@@ -16,6 +16,7 @@ const token = process.env.DISCORD_TOKEN;
 // Discord User IDs
 const teddy = process.env.TEDDY;
 const joel = process.env.JOEL;
+const paul = process.env.PAUL;
 const ethan = process.env.ETHAN;
 const nausoleumId = process.env.NAUSOLEUM;
 
@@ -34,7 +35,7 @@ async function getRandomImgurImage(searchTerm) {
     const data = await response.json();
     if (data && data.data && data.data.length > 0) {
         // Get a random image
-        const imageLinks = data.data.filter(image => image.hasOwnProperty('images') && (image.images[0].link.endsWith('.jpg') || image.images[0].link.endsWith('.png')))
+        const imageLinks = data.data.filter(image => image.hasOwnProperty('images') && (image.images[0].link.endsWith('.jpg') || image.images[0].link.endsWith('.png') || image.images[0].link.endsWith('.gif')))
         const randomImage = imageLinks[Math.floor(Math.random() * imageLinks.length)].images[0].link;
         return randomImage;
     } else {
@@ -104,7 +105,7 @@ client.once(Events.ClientReady, () => {
         if (input.trim().toLowerCase() === 'sendhotdog') {
             sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
         } else if (input.trim().toLowerCase() === 'sendcorndog') {
-            if (Math.random() > .25) {
+            if (Math.random() > .5) {
                 sendImgurImage(channel, joelUser, 'corndogs')
             } else {
                 sendKnowYourMemeImage(channel, joelUser, 'corndogs', 2);
@@ -116,24 +117,29 @@ client.once(Events.ClientReady, () => {
         }
     });
     
-    scheduleJob('0 9,16 * * *', async () => {
+    scheduleJob('0 16 * * *', async () => {
         const teddyUser = await client.users.fetch(teddy);
         const channel = client.channels.cache.get(nausoleumId);
 
         sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
     });
 
+    scheduleJob('0 17 * * *', async () => {
+        const paulUser = await client.users.fetch(paul);
+        const channel = client.channels.cache.get(nausoleumId);
+
+        sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
+    });
+
     scheduleJob('0 18 * * *', async () => {
         const joelUser = await client.users.fetch(joel);
         const channel = client.channels.cache.get(nausoleumId);
 
-        if (Math.random() > .25) {
+        if (Math.random() > .5) {
             sendImgurImage(channel, joelUser, 'corndogs')
         } else {
             sendKnowYourMemeImage(channel, joelUser, 'corndogs', 2);
         }
-
-        
     });
 });
 

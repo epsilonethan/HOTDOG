@@ -101,9 +101,12 @@ client.once(Events.ClientReady, () => {
     rl.on('line', async (input) => {
         const channel = client.channels.cache.get(nausoleumId);
         const teddyUser = await client.users.fetch(teddy);
+        const paulUser = await client.users.fetch(paul);
         const joelUser = await client.users.fetch(joel);
         if (input.trim().toLowerCase() === 'sendhotdog') {
             sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
+        } else if (input.trim().toLowerCase() === 'sendpaulhotdog') {
+            sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
         } else if (input.trim().toLowerCase() === 'sendcorndog') {
             if (Math.random() > .5) {
                 sendImgurImage(channel, joelUser, 'corndogs')

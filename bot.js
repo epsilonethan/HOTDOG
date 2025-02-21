@@ -18,7 +18,7 @@ const teddy = process.env.TEDDY;
 const joel = process.env.JOEL;
 const paul = process.env.PAUL;
 const ethan = process.env.ETHAN;
-const nausoleumId = process.env.NAUSOLEUM;
+const costcoId = process.env.COSTCO;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -99,7 +99,7 @@ client.once(Events.ClientReady, () => {
 
     // Listen for the keyboard combo in the console
     rl.on('line', async (input) => {
-        const channel = client.channels.cache.get(nausoleumId);
+        const channel = client.channels.cache.get(costcoId);
         const teddyUser = await client.users.fetch(teddy);
         const paulUser = await client.users.fetch(paul);
         const joelUser = await client.users.fetch(joel);

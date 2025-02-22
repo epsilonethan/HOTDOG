@@ -122,21 +122,21 @@ client.once(Events.ClientReady, () => {
     
     scheduleJob('0 16 * * *', async () => {
         const teddyUser = await client.users.fetch(teddy);
-        const channel = client.channels.cache.get(nausoleumId);
+        const channel = client.channels.cache.get(costcoId);
 
         sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
     });
 
     scheduleJob('0 17 * * *', async () => {
         const paulUser = await client.users.fetch(paul);
-        const channel = client.channels.cache.get(nausoleumId);
+        const channel = client.channels.cache.get(costcoId);
 
         sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
     });
 
     scheduleJob('0 18 * * *', async () => {
         const joelUser = await client.users.fetch(joel);
-        const channel = client.channels.cache.get(nausoleumId);
+        const channel = client.channels.cache.get(costcoId);
 
         if (Math.random() > .5) {
             sendImgurImage(channel, joelUser, 'corndogs')

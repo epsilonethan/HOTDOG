@@ -11,7 +11,8 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application code
-COPY . .
+COPY knowyourmeme ./knowyourmeme
+COPY bot.js ./
 
 # Expose the port the app will run on (if applicable)
 # (Typically, Discord.js bots don’t use ports, but if you have a web server, set it accordingly)

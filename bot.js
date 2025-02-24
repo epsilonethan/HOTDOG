@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
 import fetch from 'node-fetch';
-import { scheduleJob } from 'node-schedule';
+import { scheduleJob, RecurrenceRule } from 'node-schedule';
 import readline from 'readline';
 import {retrieveImages} from './knowyourmeme/index.js'
 import dotenv from 'dotenv';

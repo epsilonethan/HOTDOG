@@ -20,6 +20,15 @@ const paul = process.env.PAUL;
 const ethan = process.env.ETHAN;
 const costcoId = process.env.COSTCO;
 
+function generateCronRule(minute, hour) {
+    const rule = new RecurrenceRule();
+    rule.minute = minute;
+    rule.hour = hour;
+    rule.tz = 'US/Central';
+
+    return rule
+}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -120,21 +129,21 @@ client.once(Events.ClientReady, () => {
         }
     });
     
-    scheduleJob('0 16 * * *', async () => {
+    scheduleJob(generateCronRule(0, 16), async () => {
         const teddyUser = await client.users.fetch(teddy);
         const channel = client.channels.cache.get(costcoId);
 
         sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
     });
 
-    scheduleJob('0 17 * * *', async () => {
+    scheduleJob(generateCronRule(0, 17), async () => {
         const paulUser = await client.users.fetch(paul);
         const channel = client.channels.cache.get(costcoId);
 
         sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
     });
 
-    scheduleJob('0 18 * * *', async () => {
+    scheduleJob(generateCronRule(0, 18), async () => {
         const joelUser = await client.users.fetch(joel);
         const channel = client.channels.cache.get(costcoId);
 

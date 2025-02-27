@@ -1,11 +1,7 @@
 import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
 import fetch from 'node-fetch';
 import { scheduleJob, RecurrenceRule } from 'node-schedule';
-import readline from 'readline';
 import {retrieveImages} from './knowyourmeme/index.js'
-import dotenv from 'dotenv';
-
-dotenv.config()
 
 // Create a new Discord client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
@@ -14,11 +10,37 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const token = process.env.DISCORD_TOKEN;
 
 // Discord User IDs
-const teddy = process.env.TEDDY;
-const joel = process.env.JOEL;
-const paul = process.env.PAUL;
-const ethan = process.env.ETHAN;
 const costcoId = process.env.COSTCO;
+
+const usersToMessage = [
+    {
+        user: process.env.TEDDY,
+        cron: {
+            minute: 0,
+            hour: 16
+        },
+        searchTerm: 'hotdog',
+        knowYourMemeChance: 1
+    },
+    {
+        user: process.env.PAUL,
+        cron: {
+            minute: 0,
+            hour: 17
+        },
+        searchTerm: 'hotdog',
+        knowYourMemeChance: 1
+    },
+    {
+        user: process.env.JOEL,
+        cron: {
+            minute: 0,
+            hour: 18
+        },
+        searchTerm: 'corndog',
+        knowYourMemeChance: .5
+    },
+]
 
 function generateCronRule(minute, hour) {
     const rule = new RecurrenceRule();
@@ -28,11 +50,6 @@ function generateCronRule(minute, hour) {
 
     return rule
 }
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
 
 async function getRandomImgurImage(searchTerm) {
     const url = `https://api.imgur.com/3/gallery/search?q=${searchTerm}`
@@ -106,53 +123,18 @@ async function sendKnowYourMemeImage(channel, user, memeSearchTerm, maxPages = 1
 client.once(Events.ClientReady, () => {
     console.log('Bot is online!');
 
-    // Listen for the keyboard combo in the console
-    rl.on('line', async (input) => {
-        const channel = client.channels.cache.get(costcoId);
-        const teddyUser = await client.users.fetch(teddy);
-        const paulUser = await client.users.fetch(paul);
-        const joelUser = await client.users.fetch(joel);
-        if (input.trim().toLowerCase() === 'sendhotdog') {
-            sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
-        } else if (input.trim().toLowerCase() === 'sendpaulhotdog') {
-            sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
-        } else if (input.trim().toLowerCase() === 'sendcorndog') {
-            if (Math.random() > .5) {
-                sendImgurImage(channel, joelUser, 'corndogs')
+    usersToMessage.forEach(config => {
+        scheduleJob(generateCronRule(config.cron.minute, config.cron.hour), async () => {
+            const user = await client.users.fetch(config.user);
+            const channel = client.channels.cache.get(costcoId);
+
+            if (Math.random() > config.knowYourMemeChance) {
+                sendImgurImage(channel, user, config.searchTerm)
             } else {
-                sendKnowYourMemeImage(channel, joelUser, 'corndogs', 2);
+                sendKnowYourMemeImage(channel, user, config.searchTerm, 2);
             }
-        } else if (input.trim().toLowerCase() === 'explain') {
-            channel.send(`🌭<@${user.id}> , I decided to make a bot to auto send you hotdogs🌭\n🌭Enjoy!🌭`)
-        } else {
-            console.log(`You typed: ${input}`);
-        }
-    });
-    
-    scheduleJob(generateCronRule(0, 16), async () => {
-        const teddyUser = await client.users.fetch(teddy);
-        const channel = client.channels.cache.get(costcoId);
-
-        sendKnowYourMemeImage(channel, teddyUser, 'hotdogs');
-    });
-
-    scheduleJob(generateCronRule(0, 17), async () => {
-        const paulUser = await client.users.fetch(paul);
-        const channel = client.channels.cache.get(costcoId);
-
-        sendKnowYourMemeImage(channel, paulUser, 'hotdogs');
-    });
-
-    scheduleJob(generateCronRule(0, 18), async () => {
-        const joelUser = await client.users.fetch(joel);
-        const channel = client.channels.cache.get(costcoId);
-
-        if (Math.random() > .5) {
-            sendImgurImage(channel, joelUser, 'corndogs')
-        } else {
-            sendKnowYourMemeImage(channel, joelUser, 'corndogs', 2);
-        }
-    });
+        })
+    })
 });
 
 // Log the bot in using the token

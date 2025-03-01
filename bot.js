@@ -1,16 +1,15 @@
 import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
 import fetch from 'node-fetch';
 import { scheduleJob, RecurrenceRule } from 'node-schedule';
-import {retrieveImages} from './knowyourmeme/index.js'
+import { KnowYourMemeClient } from 'knowyourmeme-ts';
 
-// Create a new Discord client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 
-// Bot's login token
 const token = process.env.DISCORD_TOKEN;
 
-// Discord User IDs
 const costcoId = process.env.COSTCO;
+
+const knowYourMemeClient = new KnowYourMemeClient();
 
 const usersToMessage = [
     {
@@ -93,8 +92,8 @@ async function sendImgurImage(channel, user, searchTerm) {
     }
 }
 
-async function sendKnowYourMemeImage(channel, user, memeSearchTerm, maxPages = 10) {
-    const memeUrls = await retrieveImages(memeSearchTerm, maxPages);
+async function sendKnowYourMemeImage(channel, user, memeSearchTerm) {
+    const memeUrls = await kym.KnowYourMemeClient.retrieveAllImageLinks(memeSearchTerm);
 
     let description;
     if (memeSearchTerm == 'hotdogs') {
@@ -119,7 +118,6 @@ async function sendKnowYourMemeImage(channel, user, memeSearchTerm, maxPages = 1
     }
 }
 
-// When the bot is ready
 client.once(Events.ClientReady, () => {
     console.log('Bot is online!');
 
@@ -137,5 +135,4 @@ client.once(Events.ClientReady, () => {
     })
 });
 
-// Log the bot in using the token
 client.login(token);

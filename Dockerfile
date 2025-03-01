@@ -11,7 +11,6 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application code
-COPY knowyourmeme ./knowyourmeme
 COPY bot.js ./
 
 # Expose the port the app will run on (if applicable)

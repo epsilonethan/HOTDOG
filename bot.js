@@ -93,7 +93,7 @@ async function sendImgurImage(channel, user, searchTerm) {
 }
 
 async function sendKnowYourMemeImage(channel, user, memeSearchTerm) {
-    const memeUrls = await kym.KnowYourMemeClient.retrieveAllImageLinks(memeSearchTerm);
+    const memeUrls = await KnowYourMemeClient.retrieveAllImageLinks(memeSearchTerm);
 
     let description;
     if (memeSearchTerm == 'hotdogs') {

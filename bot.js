@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
 import fetch from 'node-fetch';
 import { scheduleJob, RecurrenceRule } from 'node-schedule';
-import { KnowYourMemeClient } from 'knowyourmeme-ts';
+import KnowYourMemeClient from 'knowyourmeme-ts';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 

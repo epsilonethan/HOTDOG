@@ -1,7 +1,7 @@
 import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
 import fetch from 'node-fetch';
 import { scheduleJob, RecurrenceRule } from 'node-schedule';
-import KnowYourMemeClient from 'knowyourmeme-ts';
+import { KnowYourMemeClient } from 'knowyourmeme-ts';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 
@@ -93,7 +93,7 @@ async function sendImgurImage(channel, user, searchTerm) {
 }
 
 async function sendKnowYourMemeImage(channel, user, memeSearchTerm) {
-    const memeUrls = await KnowYourMemeClient.retrieveAllImageLinks(memeSearchTerm);
+    const memeUrls = await KnowYourMemeClient.search(memeSearchTerm);
 
     let description;
     if (memeSearchTerm == 'hotdogs') {

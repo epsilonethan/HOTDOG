@@ -3,7 +3,7 @@
   "type": "module",
   "dependencies": {
     "discord.js": "^14.18.0",
-    "knowyourmeme-ts": "^0.0.3",
+    "knowyourmeme-ts": "^0.0.4",
     "node-fetch": "^3.3.2",
     "node-schedule": "^2.1.1"
   }

@@ -1,7 +1,7 @@
-import { Client, Events, GatewayIntentBits, EmbedBuilder } from 'discord.js'
+import {Client, EmbedBuilder, Events, GatewayIntentBits} from 'discord.js'
 import fetch from 'node-fetch';
-import { scheduleJob, RecurrenceRule } from 'node-schedule';
-import { KnowYourMemeClient } from 'knowyourmeme-ts';
+import {RecurrenceRule, scheduleJob} from 'node-schedule';
+import {KnowYourMemeClient} from 'knowyourmeme-ts';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 
@@ -9,7 +9,7 @@ const token = process.env.DISCORD_TOKEN;
 
 const costcoId = process.env.COSTCO;
 
-const knowYourMemeClient = new KnowYourMemeClient();
+const kymClient = new KnowYourMemeClient();
 
 const usersToMessage = [
     {
@@ -61,8 +61,7 @@ async function getRandomImgurImage(searchTerm) {
     if (data && data.data && data.data.length > 0) {
         // Get a random image
         const imageLinks = data.data.filter(image => image.hasOwnProperty('images') && (image.images[0].link.endsWith('.jpg') || image.images[0].link.endsWith('.png') || image.images[0].link.endsWith('.gif')))
-        const randomImage = imageLinks[Math.floor(Math.random() * imageLinks.length)].images[0].link;
-        return randomImage;
+        return imageLinks[Math.floor(Math.random() * imageLinks.length)].images[0].link;
     } else {
         return null;
     }
@@ -72,9 +71,9 @@ async function sendImgurImage(channel, user, searchTerm) {
     const memeUrl = await getRandomImgurImage(searchTerm);
 
     let description;
-    if (searchTerm == 'hotdogs') {
+    if (searchTerm === 'hotdogs') {
         description = `Hey <@${user.id}>, enjoy this hotdog! 🌭`
-    } else if (searchTerm == 'corndogs') {
+    } else if (searchTerm === 'corndogs') {
         description = `Hey <@${user.id}>, enjoy this corndog! 🍠`
     } else {
         description = `Hey <@${user.id}>, enjoy this ${searchTerm}!`
@@ -93,12 +92,12 @@ async function sendImgurImage(channel, user, searchTerm) {
 }
 
 async function sendKnowYourMemeImage(channel, user, memeSearchTerm) {
-    const memeUrls = await KnowYourMemeClient.search(memeSearchTerm);
+    const memeUrls = await kymClient.search(memeSearchTerm);
 
     let description;
-    if (memeSearchTerm == 'hotdogs') {
+    if (memeSearchTerm === 'hotdogs') {
         description = `Hey <@${user.id}>, enjoy this hotdog! 🌭`
-    } else if (memeSearchTerm == 'corndogs') {
+    } else if (memeSearchTerm === 'corndogs') {
         description = `Hey <@${user.id}>, enjoy this corndog! 🍠`
     } else {
         description = `Hey <@${user.id}>, enjoy this ${memeSearchTerm}!`
@@ -124,12 +123,12 @@ client.once(Events.ClientReady, () => {
     usersToMessage.forEach(config => {
         scheduleJob(generateCronRule(config.cron.minute, config.cron.hour), async () => {
             const user = await client.users.fetch(config.user);
-            const channel = client.channels.cache.get(costcoId);
+            const channel = await client.channels.fetch(costcoId);
 
             if (Math.random() > config.knowYourMemeChance) {
-                sendImgurImage(channel, user, config.searchTerm)
+                await sendImgurImage(channel, user, config.searchTerm)
             } else {
-                sendKnowYourMemeImage(channel, user, config.searchTerm, 2);
+                await sendKnowYourMemeImage(channel, user, config.searchTerm, 2);
             }
         })
     })

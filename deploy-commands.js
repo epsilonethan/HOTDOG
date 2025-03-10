@@ -30,8 +30,8 @@ const rest = new REST().setToken(token);
 	try {
 		console.info('Started removing all commands...');
 		await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
-			.then(() => logger.info('Successfully deleted all guild commands.'))
-			.catch(err => logger.error(err));
+			.then(() => console.info('Successfully deleted all guild commands.'))
+			.catch(err => console.error(err));
 
 		console.info(`Started refreshing ${commands.length} application (/) commands.`);
 
@@ -44,6 +44,6 @@ const rest = new REST().setToken(token);
 		console.info(`Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
-		logger.error(error);
+		console.error(error);
 	}
 })();

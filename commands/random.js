@@ -7,17 +7,18 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option
             .setName('search-term')
+            .setDescription('The search term')
             .setRequired(true)
     );
 export async function execute(interaction) {
     const kymClient = new KnowYourMemeClient();
-    const memeUrls = await kymClient.search(interaction.options.getString('searchTerm'));
+    const memeUrls = await kymClient.search(interaction.options.getString('search-term'));
 
     if (memeUrls && memeUrls.length > 0) {
         const randomImage = memeUrls[Math.floor(Math.random() * memeUrls.length)];
 
         const embed = new EmbedBuilder()
-            .setDescription(`Here\'s your ${interaction.options.getString('searchTerm')}`)
+            .setDescription(`Here\'s your ${interaction.options.getString('search-term')}`)
             .setImage(randomImage)
             .setTimestamp();
 

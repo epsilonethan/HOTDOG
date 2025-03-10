@@ -6,7 +6,7 @@ export const data = new SlashCommandBuilder()
     .setDescription('Send a random meme based on search term')
     .addStringOption(option =>
         option
-            .setName('searchTerm')
+            .setName('search-term')
             .setRequired(true)
     );
 export async function execute(interaction) {

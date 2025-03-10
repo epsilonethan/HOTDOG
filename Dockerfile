@@ -12,10 +12,14 @@ RUN npm install
 
 # Copy the rest of the application code
 COPY bot.js ./
+COPY deploy-commands.js ./
+COPY commands ./commands
+COPY helpers ./helpers
+
 
 # Expose the port the app will run on (if applicable)
 # (Typically, Discord.js bots don’t use ports, but if you have a web server, set it accordingly)
 # EXPOSE 3000
 
 # Set the default command to run your app (replace 'bot.js' with the entry file of your bot)
-CMD ["node", "bot.js"]
+CMD node deploy-commands.js && node bot.js

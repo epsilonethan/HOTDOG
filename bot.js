@@ -1,15 +1,12 @@
-import {Client, EmbedBuilder, Events, GatewayIntentBits} from 'discord.js'
-import fetch from 'node-fetch';
-import {RecurrenceRule, scheduleJob} from 'node-schedule';
-import {KnowYourMemeClient} from 'knowyourmeme-ts';
+import {Client, Events, GatewayIntentBits, Collection} from 'discord.js';
+import {scheduleJob} from 'node-schedule';
+import {generateCronRule} from "./helpers/cron.js";
+import {sendImgurImage} from "./helpers/imgur.js";
+import {sendKnowYourMemeImage} from "./helpers/know-your-meme.js";
+import {join} from "path";
+import {readdirSync} from "fs";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
-
-const token = process.env.DISCORD_TOKEN;
-
-const costcoId = process.env.COSTCO;
-
-const kymClient = new KnowYourMemeClient();
 
 const usersToMessage = [
     {
@@ -41,81 +38,43 @@ const usersToMessage = [
     },
 ]
 
-function generateCronRule(minute, hour) {
-    const rule = new RecurrenceRule();
-    rule.minute = minute;
-    rule.hour = hour;
-    rule.tz = 'US/Central';
+client.commands = new Collection();
 
-    return rule
+let foldersPath = join(process.cwd(), 'commands');
+
+const commandFiles = readdirSync(foldersPath).filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+    const filePath = join(foldersPath, file);
+    const command = await import(filePath);
+    // Set a new item in the Collection with the key as the command name and the value as the exported module
+    if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+    } else {
+        console.error(`The command at ${filePath} is missing a required "data" or "execute" property.`);
+    }
 }
 
-async function getRandomImgurImage(searchTerm) {
-    const url = `https://api.imgur.com/3/gallery/search?q=${searchTerm}`
-    const response = await fetch(url, {
-        headers: {
-            'Authorization': 'Client-ID ' + process.env.IMGUR_CLIENT_ID
+client.on(Events.InteractionCreate, async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    const command = interaction.client.commands.get(interaction.commandName);
+
+    if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+    }
+
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
         }
-    });
-    const data = await response.json();
-    if (data && data.data && data.data.length > 0) {
-        // Get a random image
-        const imageLinks = data.data.filter(image => image.hasOwnProperty('images') && (image.images[0].link.endsWith('.jpg') || image.images[0].link.endsWith('.png') || image.images[0].link.endsWith('.gif')))
-        return imageLinks[Math.floor(Math.random() * imageLinks.length)].images[0].link;
-    } else {
-        return null;
     }
-}
-
-async function sendImgurImage(channel, user, searchTerm) {
-    const memeUrl = await getRandomImgurImage(searchTerm);
-
-    let description;
-    if (searchTerm === 'hotdogs') {
-        description = `Hey <@${user.id}>, enjoy this hotdog! 🌭`
-    } else if (searchTerm === 'corndogs') {
-        description = `Hey <@${user.id}>, enjoy this corndog! 🍠`
-    } else {
-        description = `Hey <@${user.id}>, enjoy this ${searchTerm}!`
-    }
-
-    if (memeUrl) {
-        const embed = new EmbedBuilder()
-            .setDescription(description)
-            .setImage(memeUrl)
-            .setTimestamp();
-        
-        channel.send({embeds: [embed]});
-    } else {
-        console.log('Sorry, I couldn\'t find a hotdog meme at the moment. 😔');
-    }
-}
-
-async function sendKnowYourMemeImage(channel, user, memeSearchTerm) {
-    const memeUrls = await kymClient.search(memeSearchTerm);
-
-    let description;
-    if (memeSearchTerm === 'hotdogs') {
-        description = `Hey <@${user.id}>, enjoy this hotdog! 🌭`
-    } else if (memeSearchTerm === 'corndogs') {
-        description = `Hey <@${user.id}>, enjoy this corndog! 🍠`
-    } else {
-        description = `Hey <@${user.id}>, enjoy this ${memeSearchTerm}!`
-    }
-
-    if (memeUrls && memeUrls.length > 0) {
-        const randomImage = memeUrls[Math.floor(Math.random() * memeUrls.length)];
-
-        const embed = new EmbedBuilder()
-            .setDescription(description)
-            .setImage(randomImage)
-            .setTimestamp();
-
-        channel.send({embeds: [embed]});
-    } else {
-        console.log('Sorry, I couldn\'t find a hotdog meme at the moment');
-    }
-}
+});
 
 client.once(Events.ClientReady, () => {
     console.log('Bot is online!');
@@ -123,7 +82,7 @@ client.once(Events.ClientReady, () => {
     usersToMessage.forEach(config => {
         scheduleJob(generateCronRule(config.cron.minute, config.cron.hour), async () => {
             const user = await client.users.fetch(config.user);
-            const channel = await client.channels.fetch(costcoId);
+            const channel = await client.channels.fetch(process.env.COSTCO);
 
             if (Math.random() > config.knowYourMemeChance) {
                 await sendImgurImage(channel, user, config.searchTerm)
@@ -134,4 +93,4 @@ client.once(Events.ClientReady, () => {
     })
 });
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);

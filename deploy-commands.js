@@ -1,9 +1,6 @@
 import { REST, Routes } from 'discord.js';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { config } from 'dotenv';
-
-config();
 
 const clientId = process.env.HOTDOG_APP_ID;
 const guildId = process.env.GUILD_ID;
